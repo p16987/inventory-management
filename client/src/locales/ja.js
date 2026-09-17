@@ -193,6 +193,45 @@ export default {
   },
 
   // Filters
+  // Reports
+  reports: {
+    title: 'パフォーマンスレポート',
+    description: '四半期のパフォーマンス指標と月次トレンドを表示',
+    loadError: 'レポートの読み込みに失敗しました',
+    notAvailable: '該当なし',
+    quarterly: {
+      title: '四半期パフォーマンス',
+      quarter: '四半期',
+      totalOrders: '総注文数',
+      totalRevenue: '総売上',
+      avgOrderValue: '平均注文額',
+      fulfillmentRate: '納品率',
+      empty: '四半期の実績がまだありません',
+      emptyHint: '該当する四半期に注文が入ると、ここに表示されます。'
+    },
+    monthly: {
+      title: '月次売上トレンド',
+      empty: 'グラフに表示できる月次売上がありません',
+      emptyHint: '1か月分以上の注文が記録されると、棒グラフが表示されます。'
+    },
+    comparison: {
+      title: '前月比分析',
+      month: '月',
+      orders: '注文数',
+      revenue: '売上',
+      change: '増減額',
+      growthRate: '成長率',
+      empty: '前月比を表示できません',
+      emptyHint: '成長率の比較には2か月分以上の注文が必要です。'
+    },
+    summary: {
+      totalRevenue: '総売上',
+      avgMonthlyRevenue: '月平均売上',
+      totalOrders: '総注文数',
+      bestQuarter: '最高業績の四半期'
+    }
+  },
+
   filters: {
     timePeriod: '期間',
     location: '場所',

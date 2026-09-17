@@ -2,43 +2,47 @@
   <div class="reports">
     <div class="page-header">
       <div>
-        <h2>Performance Reports</h2>
-        <p>View quarterly performance metrics and monthly trends</p>
+        <h2>{{ t('reports.title') }}</h2>
+        <p>{{ t('reports.description') }}</p>
       </div>
     </div>
 
     <!-- Skeleton rows stand in for the report tables so the page holds its
-         height while loading instead of jumping when the data arrives. -->
-    <div v-if="loading" class="stack">
+         height while loading instead of jumping when the data arrives. The
+         loading string stays for screen readers. -->
+    <div v-if="loading" class="stack" aria-busy="true">
+      <span class="sr-only">{{ t('common.loading') }}</span>
       <div v-for="n in 6" :key="n" class="skeleton skeleton-row"></div>
     </div>
     <div v-else-if="error" class="state state--error">
-      <p class="state-title">Couldn't load reports</p>
+      <p class="state-title">{{ t('reports.loadError') }}</p>
       <p>{{ error }}</p>
     </div>
     <div v-else>
       <!-- Quarterly Performance -->
       <div class="card card--flush">
         <div class="card-header">
-          <h3 class="card-title">Quarterly Performance</h3>
+          <h3 class="card-title">{{ t('reports.quarterly.title') }}</h3>
         </div>
         <div class="table-container">
           <table class="data-table">
             <thead>
               <tr>
-                <th>Quarter</th>
-                <th class="num">Total Orders</th>
-                <th class="num">Total Revenue (USD)</th>
-                <th class="num">Avg Order Value (USD)</th>
-                <th class="col-fit">Fulfillment Rate</th>
+                <th>{{ t('reports.quarterly.quarter') }}</th>
+                <th class="num">{{ t('reports.quarterly.totalOrders') }}</th>
+                <!-- Currency lives in the header rather than in every cell; the
+                     symbol follows the selected locale. -->
+                <th class="num">{{ t('reports.quarterly.totalRevenue') }} ({{ currencySymbol }})</th>
+                <th class="num">{{ t('reports.quarterly.avgOrderValue') }} ({{ currencySymbol }})</th>
+                <th class="col-fit">{{ t('reports.quarterly.fulfillmentRate') }}</th>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(q, index) in quarterlyData" :key="index">
+              <tr v-for="q in quarterlyData" :key="q.quarter">
                 <td><strong>{{ q.quarter }}</strong></td>
                 <td class="num">{{ q.total_orders }}</td>
-                <td class="num">{{ formatNumber(q.total_revenue) }}</td>
-                <td class="num">{{ formatNumber(q.avg_order_value) }}</td>
+                <td class="num">{{ formatAmount(q.total_revenue) }}</td>
+                <td class="num">{{ formatAmount(q.avg_order_value) }}</td>
                 <td class="col-fit">
                   <span :class="getFulfillmentClass(q.fulfillment_rate)">
                     {{ q.fulfillment_rate }}%
@@ -49,24 +53,24 @@
           </table>
         </div>
         <div v-if="!quarterlyData.length" class="state state--empty">
-          <p class="state-title">No quarterly results yet</p>
-          <p>A quarter appears here once orders have been placed within it.</p>
+          <p class="state-title">{{ t('reports.quarterly.empty') }}</p>
+          <p>{{ t('reports.quarterly.emptyHint') }} {{ t('common.noDataHint') }}</p>
         </div>
       </div>
 
       <!-- Monthly Trends Chart -->
       <div class="card">
         <div class="card-header">
-          <h3 class="card-title">Monthly Revenue Trend</h3>
+          <h3 class="card-title">{{ t('reports.monthly.title') }}</h3>
         </div>
         <div v-if="monthlyData.length" class="chart-container">
           <div class="bar-chart">
-            <div v-for="(month, index) in monthlyData" :key="index" class="bar-wrapper">
+            <div v-for="month in monthlyData" :key="month.month" class="bar-wrapper">
               <div class="bar-container">
                 <div
                   class="bar"
                   :style="{ height: getBarHeight(month.revenue) + 'px' }"
-                  :title="'$' + formatNumber(month.revenue)"
+                  :title="formatMoney(month.revenue)"
                 ></div>
               </div>
               <div class="bar-label">{{ formatMonth(month.month) }}</div>
@@ -74,32 +78,32 @@
           </div>
         </div>
         <div v-else class="state state--empty">
-          <p class="state-title">No monthly revenue to chart</p>
-          <p>Bars appear here once at least one month of orders has been recorded.</p>
+          <p class="state-title">{{ t('reports.monthly.empty') }}</p>
+          <p>{{ t('reports.monthly.emptyHint') }} {{ t('common.noDataHint') }}</p>
         </div>
       </div>
 
       <!-- Month-over-Month Comparison -->
       <div class="card card--flush">
         <div class="card-header">
-          <h3 class="card-title">Month-over-Month Analysis</h3>
+          <h3 class="card-title">{{ t('reports.comparison.title') }}</h3>
         </div>
         <div class="table-container">
           <table class="data-table">
             <thead>
               <tr>
-                <th>Month</th>
-                <th class="num">Orders</th>
-                <th class="num">Revenue (USD)</th>
-                <th class="num">Change</th>
-                <th class="num">Growth Rate</th>
+                <th>{{ t('reports.comparison.month') }}</th>
+                <th class="num">{{ t('reports.comparison.orders') }}</th>
+                <th class="num">{{ t('reports.comparison.revenue') }} ({{ currencySymbol }})</th>
+                <th class="num">{{ t('reports.comparison.change') }}</th>
+                <th class="num">{{ t('reports.comparison.growthRate') }}</th>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(month, index) in monthlyData" :key="index">
+              <tr v-for="(month, index) in monthlyData" :key="month.month">
                 <td><strong>{{ formatMonth(month.month) }}</strong></td>
                 <td class="num">{{ month.order_count }}</td>
-                <td class="num">{{ formatNumber(month.revenue) }}</td>
+                <td class="num">{{ formatAmount(month.revenue) }}</td>
                 <td class="num">
                   <span v-if="index > 0" :class="getChangeClass(month.revenue, monthlyData[index - 1].revenue)">
                     {{ getChangeValue(month.revenue, monthlyData[index - 1].revenue) }}
@@ -117,27 +121,27 @@
           </table>
         </div>
         <div v-if="!monthlyData.length" class="state state--empty">
-          <p class="state-title">No monthly comparison available</p>
-          <p>Two or more months of orders are needed before growth can be compared.</p>
+          <p class="state-title">{{ t('reports.comparison.empty') }}</p>
+          <p>{{ t('reports.comparison.emptyHint') }} {{ t('common.noDataHint') }}</p>
         </div>
       </div>
 
       <!-- Summary Stats -->
       <div class="stats-grid">
         <div class="stat-card">
-          <div class="stat-label">Total Revenue (YTD)</div>
-          <div class="stat-value">${{ formatNumber(totalRevenue) }}</div>
+          <div class="stat-label">{{ t('reports.summary.totalRevenue') }}</div>
+          <div class="stat-value">{{ formatMoney(totalRevenue) }}</div>
         </div>
         <div class="stat-card">
-          <div class="stat-label">Avg Monthly Revenue</div>
-          <div class="stat-value">${{ formatNumber(avgMonthlyRevenue) }}</div>
+          <div class="stat-label">{{ t('reports.summary.avgMonthlyRevenue') }}</div>
+          <div class="stat-value">{{ formatMoney(avgMonthlyRevenue) }}</div>
         </div>
         <div class="stat-card">
-          <div class="stat-label">Total Orders (YTD)</div>
+          <div class="stat-label">{{ t('reports.summary.totalOrders') }}</div>
           <div class="stat-value">{{ totalOrders }}</div>
         </div>
         <div class="stat-card">
-          <div class="stat-label">Best Performing Quarter</div>
+          <div class="stat-label">{{ t('reports.summary.bestQuarter') }}</div>
           <div class="stat-value">{{ bestQuarter }}</div>
         </div>
       </div>
@@ -146,192 +150,180 @@
 </template>
 
 <script>
-import axios from 'axios'
+import { ref, computed, onMounted, watch } from 'vue'
+import { api } from '../api'
+import { useFilters } from '../composables/useFilters'
+import { useI18n } from '../composables/useI18n'
+import { convertAmount, formatCurrency, formatCurrencyWithDecimals } from '../utils/currency'
+
+// Height of .bar-container in the scoped styles; every bar is scaled against it.
+const CHART_MAX_HEIGHT = 200
 
 export default {
   name: 'Reports',
-  data() {
-    return {
-      loading: true,
-      error: null,
-      quarterlyData: [],
-      monthlyData: [],
-      totalRevenue: 0,
-      avgMonthlyRevenue: 0,
-      totalOrders: 0,
-      bestQuarter: ''
-    }
-  },
-  mounted() {
-    console.log('Reports component mounted')
-    this.loadData()
-  },
-  methods: {
-    async loadData() {
-      console.log('Loading reports data...')
+  setup() {
+    const { t, currentLocale, currentCurrency } = useI18n()
+
+    const loading = ref(true)
+    const error = ref(null)
+    const quarterlyData = ref([])
+    const monthlyData = ref([])
+
+    // Use shared filters
+    const {
+      selectedPeriod,
+      selectedLocation,
+      selectedCategory,
+      selectedStatus,
+      getCurrentFilters
+    } = useFilters()
+
+    const currencySymbol = computed(() => (currentCurrency.value === 'JPY' ? '¥' : '$'))
+
+    const intlLocale = computed(() => (currentLocale.value === 'ja' ? 'ja-JP' : 'en-US'))
+
+    const loadData = async () => {
       try {
-        this.loading = true
+        loading.value = true
+        // Cleared on every attempt, otherwise one failed load would leave the
+        // error state on screen even after a later filter change succeeds.
+        error.value = null
 
-        // Fetch quarterly data
-        console.log('Fetching quarterly data...')
-        const quarterlyResponse = await axios.get('http://localhost:8001/api/reports/quarterly')
-        this.quarterlyData = quarterlyResponse.data
-        console.log('Quarterly data:', this.quarterlyData)
+        const filters = getCurrentFilters()
+        const [quarterly, monthly] = await Promise.all([
+          api.getQuarterlyReports(filters),
+          api.getMonthlyTrends(filters)
+        ])
 
-        // Fetch monthly data
-        console.log('Fetching monthly data...')
-        const monthlyResponse = await axios.get('http://localhost:8001/api/reports/monthly-trends')
-        this.monthlyData = monthlyResponse.data
-        console.log('Monthly data:', this.monthlyData)
-
-        // Calculate summary stats
-        console.log('Calculating summary stats...')
-        this.calculateSummaryStats()
-        console.log('Summary stats calculated')
-
+        quarterlyData.value = quarterly
+        monthlyData.value = monthly
       } catch (err) {
-        console.log('Error loading reports:', err)
-        this.error = 'Failed to load reports: ' + err.message
+        error.value = err.message
+        console.error('Reports error:', err)
       } finally {
-        this.loading = false
-        console.log('Loading complete')
+        loading.value = false
       }
-    },
+    }
 
-    calculateSummaryStats() {
-      // Calculate total revenue
-      var total = 0
-      for (var i = 0; i < this.monthlyData.length; i++) {
-        total = total + this.monthlyData[i].revenue
+    // Watch for filter changes and reload data
+    watch([selectedPeriod, selectedLocation, selectedCategory, selectedStatus], () => {
+      loadData()
+    })
+
+    // Summary stats are derived rather than assigned, so they can't fall out of
+    // step with the rows after a filter-triggered reload.
+    const totalRevenue = computed(() =>
+      monthlyData.value.reduce((sum, month) => sum + (Number(month.revenue) || 0), 0)
+    )
+
+    const avgMonthlyRevenue = computed(() =>
+      monthlyData.value.length ? totalRevenue.value / monthlyData.value.length : 0
+    )
+
+    const totalOrders = computed(() =>
+      monthlyData.value.reduce((sum, month) => sum + (Number(month.order_count) || 0), 0)
+    )
+
+    const bestQuarter = computed(() => {
+      const best = quarterlyData.value.reduce((winner, q) => {
+        if (!winner || (Number(q.total_revenue) || 0) > (Number(winner.total_revenue) || 0)) return q
+        return winner
+      }, null)
+      return best ? best.quarter : t('reports.notAvailable')
+    })
+
+    // Computed once per data change instead of once per bar, which is what the
+    // previous per-bar scan of monthlyData did on every render.
+    const maxRevenue = computed(() =>
+      monthlyData.value.reduce((max, month) => Math.max(max, Number(month.revenue) || 0), 0)
+    )
+
+    // Bare grouped number for table cells: the column header carries the
+    // symbol, but the value still converts and groups per the active locale.
+    const formatAmount = (value) => {
+      const amount = convertAmount(Number(value) || 0, currentCurrency.value)
+      const fractionDigits = currentCurrency.value === 'JPY' ? 0 : 2
+      return amount.toLocaleString(intlLocale.value, {
+        minimumFractionDigits: fractionDigits,
+        maximumFractionDigits: fractionDigits
+      })
+    }
+
+    // Symbol included, for stat tiles and the chart tooltip.
+    const formatMoney = (value) => formatCurrency(Number(value) || 0, currentCurrency.value)
+
+    const formatMonth = (monthStr) => {
+      const [year, month] = String(monthStr).split('-')
+      const monthIndex = parseInt(month, 10) - 1
+      // A malformed key would otherwise index past the month array and render
+      // as "undefined 2025"; show the raw value instead.
+      if (!Number.isInteger(monthIndex) || monthIndex < 0 || monthIndex > 11) {
+        return String(monthStr)
       }
-      this.totalRevenue = total
+      return new Date(Number(year), monthIndex).toLocaleDateString(intlLocale.value, {
+        year: 'numeric',
+        month: 'short'
+      })
+    }
 
-      // Calculate average monthly revenue
-      if (this.monthlyData.length > 0) {
-        this.avgMonthlyRevenue = total / this.monthlyData.length
-      } else {
-        this.avgMonthlyRevenue = 0
-      }
+    const getBarHeight = (revenue) => {
+      if (maxRevenue.value === 0) return 0
+      return ((Number(revenue) || 0) / maxRevenue.value) * CHART_MAX_HEIGHT
+    }
 
-      // Calculate total orders
-      var orders = 0
-      for (var i = 0; i < this.monthlyData.length; i++) {
-        orders = orders + this.monthlyData[i].order_count
-      }
-      this.totalOrders = orders
+    const getFulfillmentClass = (rate) => {
+      const value = Number(rate) || 0
+      if (value >= 90) return 'badge success'
+      if (value >= 75) return 'badge warning'
+      return 'badge danger'
+    }
 
-      // Find best quarter
-      var bestQ = ''
-      var bestRevenue = 0
-      for (var i = 0; i < this.quarterlyData.length; i++) {
-        if (this.quarterlyData[i].total_revenue > bestRevenue) {
-          bestRevenue = this.quarterlyData[i].total_revenue
-          bestQ = this.quarterlyData[i].quarter
-        }
-      }
-      this.bestQuarter = bestQ
-    },
+    const getChangeValue = (current, previous) => {
+      const change = (Number(current) || 0) - (Number(previous) || 0)
+      const sign = change > 0 ? '+' : change < 0 ? '-' : ''
+      // Deltas keep their cents in USD so the column reconciles with revenue.
+      return sign + formatCurrencyWithDecimals(Math.abs(change), currentCurrency.value, 2)
+    }
 
-    formatNumber(num) {
-      console.log('Formatting number:', num)
-      // Format number with commas
-      var str = num.toString()
-      var parts = str.split('.')
-      var intPart = parts[0]
-      var decPart = parts.length > 1 ? parts[1] : '00'
+    const getChangeClass = (current, previous) => {
+      const change = (Number(current) || 0) - (Number(previous) || 0)
+      if (change > 0) return 'positive-change'
+      if (change < 0) return 'negative-change'
+      return ''
+    }
 
-      var formatted = ''
-      var count = 0
-      for (var i = intPart.length - 1; i >= 0; i--) {
-        if (count > 0 && count % 3 === 0) {
-          formatted = ',' + formatted
-        }
-        formatted = intPart[i] + formatted
-        count++
-      }
+    const getGrowthRate = (current, previous) => {
+      const base = Number(previous) || 0
+      if (base === 0) return t('reports.notAvailable')
 
-      if (decPart.length === 1) {
-        decPart = decPart + '0'
-      }
-      if (decPart.length > 2) {
-        decPart = decPart.substring(0, 2)
-      }
-
-      return formatted + '.' + decPart
-    },
-
-    formatMonth(monthStr) {
-      console.log('Formatting month:', monthStr)
-      // Convert YYYY-MM to readable format
-      var parts = monthStr.split('-')
-      var year = parts[0]
-      var month = parts[1]
-
-      var monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-      var monthIndex = parseInt(month) - 1
-
-      return monthNames[monthIndex] + ' ' + year
-    },
-
-    getBarHeight(revenue) {
-      console.log('Calculating bar height for revenue:', revenue)
-      // Calculate bar height (max height 200px)
-      var maxRevenue = 0
-      for (var i = 0; i < this.monthlyData.length; i++) {
-        if (this.monthlyData[i].revenue > maxRevenue) {
-          maxRevenue = this.monthlyData[i].revenue
-        }
-      }
-
-      if (maxRevenue === 0) {
-        return 0
-      }
-
-      var height = (revenue / maxRevenue) * 200
-      return height
-    },
-
-    getFulfillmentClass(rate) {
-      if (rate >= 90) {
-        return 'badge success'
-      } else if (rate >= 75) {
-        return 'badge warning'
-      } else {
-        return 'badge danger'
-      }
-    },
-
-    getChangeValue(current, previous) {
-      var change = current - previous
-      if (change > 0) {
-        return '+$' + this.formatNumber(change)
-      } else if (change < 0) {
-        return '-$' + this.formatNumber(Math.abs(change))
-      } else {
-        return '$0.00'
-      }
-    },
-
-    getChangeClass(current, previous) {
-      var change = current - previous
-      if (change > 0) {
-        return 'positive-change'
-      } else if (change < 0) {
-        return 'negative-change'
-      } else {
-        return ''
-      }
-    },
-
-    getGrowthRate(current, previous) {
-      if (previous === 0) {
-        return 'N/A'
-      }
-
-      var rate = ((current - previous) / previous) * 100
-      var sign = rate > 0 ? '+' : ''
-
+      const rate = (((Number(current) || 0) - base) / base) * 100
+      const sign = rate > 0 ? '+' : ''
       return sign + rate.toFixed(1) + '%'
+    }
+
+    onMounted(() => {
+      loadData()
+    })
+
+    return {
+      t,
+      loading,
+      error,
+      quarterlyData,
+      monthlyData,
+      currencySymbol,
+      totalRevenue,
+      avgMonthlyRevenue,
+      totalOrders,
+      bestQuarter,
+      formatAmount,
+      formatMoney,
+      formatMonth,
+      getBarHeight,
+      getFulfillmentClass,
+      getChangeValue,
+      getChangeClass,
+      getGrowthRate
     }
   }
 }
