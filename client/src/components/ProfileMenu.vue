@@ -120,22 +120,26 @@ const handleLogout = () => {
   position: relative;
 }
 
+/* Sidebar footer row: matches the nav items rather than floating as a card. */
+.profile-button {
+  width: 100%;
+}
+
 .profile-button {
   display: flex;
   align-items: center;
-  gap: 0.625rem;
-  padding: 0.5rem 0.875rem;
-  background: white;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-sm);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color var(--duration-fast) var(--ease);
   font-family: inherit;
 }
 
 .profile-button:hover {
-  background: #f8fafc;
-  border-color: #cbd5e1;
+  background: var(--color-surface-hover);
 }
 
 .avatar {
@@ -169,8 +173,10 @@ const handleLogout = () => {
 
 .dropdown-menu {
   position: absolute;
-  top: calc(100% + 0.5rem);
-  right: 0;
+  /* Anchored to the bottom of the rail, so it opens upward — `top: 100%` would
+     put it off the bottom of the viewport. */
+  bottom: calc(100% + var(--space-2));
+  left: 0;
   min-width: 280px;
   background: white;
   border: 1px solid #e2e8f0;

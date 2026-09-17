@@ -1,0 +1,599 @@
+{
+  "results": [
+    {
+      "step": "goto /",
+      "url": "http://localhost:3000/",
+      "words": 352,
+      "heading": "Overview",
+      "activeNav": "Overview",
+      "errorBanner": null,
+      "cards": 9,
+      "rows": 16,
+      "scrollW": 1440,
+      "clientW": 1440
+    },
+    {
+      "step": "click Overview (/)",
+      "from": "http://localhost:3000/",
+      "url": "http://localhost:3000/",
+      "words": 352,
+      "heading": "Overview",
+      "activeNav": "Overview",
+      "errorBanner": null,
+      "cards": 9,
+      "rows": 16,
+      "scrollW": 1440,
+      "clientW": 1440
+    },
+    {
+      "step": "click Inventory (/inventory)",
+      "from": "http://localhost:3000/",
+      "url": "http://localhost:3000/inventory",
+      "words": 503,
+      "heading": "Inventory",
+      "activeNav": "Inventory",
+      "errorBanner": null,
+      "cards": 1,
+      "rows": 32,
+      "scrollW": 1440,
+      "clientW": 1440
+    },
+    {
+      "step": "click Orders (/orders)",
+      "from": "http://localhost:3000/inventory",
+      "url": "http://localhost:3000/orders",
+      "words": 3451,
+      "heading": "Orders",
+      "activeNav": "Orders",
+      "errorBanner": null,
+      "cards": 6,
+      "rows": 251,
+      "scrollW": 1440,
+      "clientW": 1440
+    },
+    {
+      "step": "click Restocking (/restocking)",
+      "from": "http://localhost:3000/orders",
+      "url": "http://localhost:3000/restocking",
+      "words": 185,
+      "heading": "Restocking",
+      "activeNav": "Restocking",
+      "errorBanner": null,
+      "cards": 6,
+      "rows": 5,
+      "scrollW": 1440,
+      "clientW": 1440
+    },
+    {
+      "step": "click Finance (/spending)",
+      "from": "http://localhost:3000/restocking",
+      "url": "http://localhost:3000/spending",
+      "words": 657,
+      "heading": "Finance Dashboard",
+      "activeNav": "Finance",
+      "errorBanner": null,
+      "cards": 8,
+      "rows": 56,
+      "scrollW": 1440,
+      "clientW": 1440
+    },
+    {
+      "step": "click Demand Forecast (/demand)",
+      "from": "http://localhost:3000/spending",
+      "url": "http://localhost:3000/demand",
+      "words": 595,
+      "heading": "Demand Forecast",
+      "activeNav": "Demand Forecast",
+      "errorBanner": null,
+      "cards": 4,
+      "rows": 40,
+      "scrollW": 1440,
+      "clientW": 1440
+    },
+    {
+      "step": "click Reports (/reports)",
+      "from": "http://localhost:3000/demand",
+      "url": "http://localhost:3000/reports",
+      "words": 205,
+      "heading": "Performance Reports",
+      "activeNav": "Reports",
+      "errorBanner": null,
+      "cards": 7,
+      "rows": 16,
+      "scrollW": 1440,
+      "clientW": 1440
+    }
+  ],
+  "events": [
+    {
+      "route": "/",
+      "level": "debug",
+      "text": "[vite] connecting..."
+    },
+    {
+      "route": "/",
+      "level": "debug",
+      "text": "[vite] connected."
+    },
+    {
+      "route": "/",
+      "level": "warning",
+      "text": "[Vue warn]: Failed to resolve component: PurchaseOrderModal\nIf this is a native custom element, make sure to exclude it from component resolution via compilerOptions.isCustomElement. \n  at <Dashboard onVnodeUnmounted=fn<onVnodeUnmounted> ref=Ref< undefined > > \n  at <RouterView> \n  at <App>"
+    },
+    {
+      "route": "/",
+      "level": "http404",
+      "text": "GET http://localhost:8001/api/tasks"
+    },
+    {
+      "route": "/",
+      "level": "error",
+      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    },
+    {
+      "route": "/",
+      "level": "error",
+      "text": "Failed to load tasks: AxiosError: Request failed with status code 404\n    at settle (http://localhost:3000/node_modules/.vite/deps/axios.js?v=9c90a250:1799:12)\n    at XMLHttpRequest.onloadend (http://localhost:3000/node_modules/.vite/deps/axios.js?v=9c90a250:2329:7)\n    at Axios.request (http://loca"
+    },
+    {
+      "route": "/",
+      "level": "warning",
+      "text": "[Vue warn]: Failed to resolve component: PurchaseOrderModal\nIf this is a native custom element, make sure to exclude it from component resolution via compilerOptions.isCustomElement. \n  at <Dashboard onVnodeUnmounted=fn<onVnodeUnmounted> ref=Ref< Proxy(Object) > > \n  at <RouterView> \n  at <App>"
+    },
+    {
+      "route": "/",
+      "level": "error",
+      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Reports component mounted"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Loading reports data..."
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Fetching quarterly data..."
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Quarterly data: Proxy(Array)"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Fetching monthly data..."
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Monthly data: Proxy(Array)"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Calculating summary stats..."
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Summary stats calculated"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Loading complete"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Formatting number: 8653365"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Formatting number: 139570.4"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Formatting number: 4345381.64"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Formatting number: 67896.59"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Formatting number: 7551977.410000001"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Formatting number: 121806.09"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Formatting number: 10616129.040000001"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Formatting number: 171227.89"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Calculating bar height for revenue: 1993655.7400000002"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Formatting number: 1993655.7400000002"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Formatting month: 2025-01"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Calculating bar height for revenue: 4374516"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Formatting number: 4374516"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Formatting month: 2025-02"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Calculating bar height for revenue: 2285193.26"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Formatting number: 2285193.26"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Formatting month: 2025-03"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Calculating bar height for revenue: 1490663.97"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Formatting number: 1490663.97"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Formatting month: 2025-04"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Calculating bar height for revenue: 1460581.7400000002"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Formatting number: 1460581.7400000002"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Formatting month: 2025-05"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Calculating bar height for revenue: 1394135.9300000002"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Formatting number: 1394135.9300000002"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Formatting month: 2025-06"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Calculating bar height for revenue: 3036142.5"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Formatting number: 3036142.5"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Formatting month: 2025-07"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Calculating bar height for revenue: 1848694.1300000001"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Formatting number: 1848694.1300000001"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Formatting month: 2025-08"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Calculating bar height for revenue: 2667140.7800000003"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Formatting number: 2667140.7800000003"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Formatting month: 2025-09"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Calculating bar height for revenue: 2714614.17"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Formatting number: 2714614.17"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Formatting month: 2025-10"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Calculating bar height for revenue: 2668438.9299999997"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Formatting number: 2668438.9299999997"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Formatting month: 2025-11"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Calculating bar height for revenue: 5233075.9399999995"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Formatting number: 5233075.9399999995"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Formatting month: 2025-12"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Formatting month: 2025-01"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Formatting number: 1993655.7400000002"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Formatting month: 2025-02"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Formatting number: 4374516"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Formatting number: 2380860.26"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Formatting month: 2025-03"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Formatting number: 2285193.26"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Formatting number: 2089322.7400000002"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Formatting month: 2025-04"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Formatting number: 1490663.97"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Formatting number: 794529.2899999998"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Formatting month: 2025-05"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Formatting number: 1460581.7400000002"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Formatting number: 30082.22999999975"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Formatting month: 2025-06"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Formatting number: 1394135.9300000002"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Formatting number: 66445.81000000006"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Formatting month: 2025-07"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Formatting number: 3036142.5"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Formatting number: 1642006.5699999998"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Formatting month: 2025-08"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Formatting number: 1848694.1300000001"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Formatting number: 1187448.3699999999"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Formatting month: 2025-09"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Formatting number: 2667140.7800000003"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Formatting number: 818446.6500000001"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Formatting month: 2025-10"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Formatting number: 2714614.17"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Formatting number: 47473.389999999665"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Formatting month: 2025-11"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Formatting number: 2668438.9299999997"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Formatting number: 46175.24000000022"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Formatting month: 2025-12"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Formatting number: 5233075.9399999995"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Formatting number: 2564637.01"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Formatting number: 31166853.089999996"
+    },
+    {
+      "route": "/reports",
+      "level": "log",
+      "text": "Formatting number: 2597237.7575"
+    }
+  ]
+}

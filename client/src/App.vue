@@ -1,42 +1,33 @@
 <template>
-  <div class="app">
-    <header class="top-nav">
-      <div class="nav-container">
-        <div class="logo">
-          <h1>{{ t('nav.companyName') }}</h1>
-          <span class="subtitle">{{ t('nav.subtitle') }}</span>
-        </div>
-        <nav class="nav-tabs">
-          <router-link to="/" :class="{ active: $route.path === '/' }">
-            {{ t('nav.overview') }}
-          </router-link>
-          <router-link to="/inventory" :class="{ active: $route.path === '/inventory' }">
-            {{ t('nav.inventory') }}
-          </router-link>
-          <router-link to="/orders" :class="{ active: $route.path === '/orders' }">
-            {{ t('nav.orders') }}
-          </router-link>
-          <router-link to="/spending" :class="{ active: $route.path === '/spending' }">
-            {{ t('nav.finance') }}
-          </router-link>
-          <router-link to="/demand" :class="{ active: $route.path === '/demand' }">
-            {{ t('nav.demandForecast') }}
-          </router-link>
-          <router-link to="/reports" :class="{ active: $route.path === '/reports' }">
-            Reports
-          </router-link>
-        </nav>
+  <div class="app-shell">
+    <!-- Keyboard users shouldn't tab through the whole rail on every page. -->
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <AppSidebar
+      :items="navItems"
+      :brand="{ name: t('nav.companyName'), subtitle: t('nav.subtitle') }"
+      @update:collapsed="sidebarCollapsed = $event"
+    >
+      <!-- App-level chrome that used to sit in the top bar. It's set once and
+           then forgotten, so it belongs at the bottom of the rail rather than
+           in prime horizontal space. -->
+      <template #footer>
         <LanguageSwitcher />
         <ProfileMenu
           @show-profile-details="showProfileDetails = true"
           @show-tasks="showTasks = true"
         />
-      </div>
-    </header>
-    <FilterBar />
-    <main class="main-content">
-      <router-view />
-    </main>
+      </template>
+    </AppSidebar>
+
+    <div class="app-main" :class="{ 'is-narrow': sidebarCollapsed }">
+      <!-- Filters change what you're looking at rather than where you are, so
+           they stay with the content column instead of moving into the nav. -->
+      <FilterBar class="app-filters" />
+      <main id="main" class="app-content">
+        <router-view />
+      </main>
+    </div>
 
     <ProfileDetailsModal
       :is-open="showProfileDetails"
@@ -56,9 +47,11 @@
 
 <script>
 import { ref, onMounted, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { api } from './api'
 import { useAuth } from './composables/useAuth'
 import { useI18n } from './composables/useI18n'
+import AppSidebar from './components/AppSidebar.vue'
 import FilterBar from './components/FilterBar.vue'
 import ProfileMenu from './components/ProfileMenu.vue'
 import ProfileDetailsModal from './components/ProfileDetailsModal.vue'
@@ -68,6 +61,7 @@ import LanguageSwitcher from './components/LanguageSwitcher.vue'
 export default {
   name: 'App',
   components: {
+    AppSidebar,
     FilterBar,
     ProfileMenu,
     ProfileDetailsModal,
@@ -77,9 +71,28 @@ export default {
   setup() {
     const { currentUser } = useAuth()
     const { t } = useI18n()
+    const router = useRouter()
     const showProfileDetails = ref(false)
     const showTasks = ref(false)
+    const sidebarCollapsed = ref(false)
     const apiTasks = ref([])
+
+    // Nav is derived from the router's own records rather than hand-written
+    // markup, so adding a route with meta.nav is all it takes to appear in the
+    // sidebar. t() reads a module-level ref, which makes this recompute when
+    // the locale changes.
+    const navItems = computed(() =>
+      router
+        .getRoutes()
+        .filter((r) => r.meta && r.meta.nav)
+        .sort((a, b) => (a.meta.nav.order || 0) - (b.meta.nav.order || 0))
+        .map((r) => ({
+          to: r.path,
+          label: r.meta.nav.labelKey ? t(r.meta.nav.labelKey) : r.meta.nav.label,
+          icon: r.meta.nav.icon,
+          exact: r.path === '/'
+        }))
+    )
 
     // Merge mock tasks from currentUser with API tasks
     const tasks = computed(() => {
@@ -150,6 +163,8 @@ export default {
 
     return {
       t,
+      navItems,
+      sidebarCollapsed,
       showProfileDetails,
       showTasks,
       tasks,
@@ -162,325 +177,138 @@ export default {
 </script>
 
 <style>
+/* Global, unscoped: this file owns the page frame. Everything else — cards,
+   tables, badges, buttons, states — now lives in styles/primitives.css, built
+   on styles/tokens.css. If you need a value that isn't a token, add it to the
+   token file rather than inlining it here. */
+
+/* The app's original reset. Kept deliberately: views rely on headings and
+   paragraphs having no default margin, and removing it would re-space every
+   screen at once. */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-  background: #f8fafc;
-  color: #1e293b;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-.app {
-  display: flex;
-  flex-direction: column;
+.app-shell {
   min-height: 100vh;
+  background: var(--color-bg);
 }
 
-.top-nav {
-  background: #ffffff;
-  border-bottom: 1px solid #e2e8f0;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+/* The sidebar is fixed, so the content column is offset with margin rather than
+   being a scroll container of its own. A scroll container would break
+   `position: sticky` inside views — which is how sticky table headers quietly
+   stop working. */
+.app-main {
+  margin-left: var(--sidebar-width);
+  min-width: 0;
+  transition: margin-left var(--duration-base) var(--ease);
+}
+
+.app-main.is-narrow {
+  margin-left: var(--sidebar-width-collapsed);
+}
+
+.app-filters {
   position: sticky;
   top: 0;
-  z-index: 100;
+  z-index: var(--z-sticky);
 }
 
-.nav-container {
-  max-width: 1600px;
+.app-content {
+  max-width: var(--content-max);
   margin: 0 auto;
-  display: flex;
-  align-items: center;
-  padding: 0 2rem;
-  height: 70px;
+  padding: var(--content-pad-y) var(--content-pad-x);
 }
 
-.nav-container > .nav-tabs {
-  margin-left: auto;
-  margin-right: 1rem;
-}
-
-.nav-container > .language-switcher {
-  margin-right: 1rem;
-}
-
-.logo {
-  display: flex;
-  align-items: baseline;
-  gap: 0.75rem;
-}
-
-.logo h1 {
-  font-size: 1.375rem;
-  font-weight: 700;
-  color: #0f172a;
-  letter-spacing: -0.025em;
-}
-
-.subtitle {
-  font-size: 0.813rem;
-  color: #64748b;
-  font-weight: 400;
-  padding-left: 0.75rem;
-  border-left: 1px solid #e2e8f0;
-}
-
-.nav-tabs {
-  display: flex;
-  gap: 0.25rem;
-}
-
-.nav-tabs a {
-  padding: 0.625rem 1.25rem;
-  color: #64748b;
-  text-decoration: none;
-  font-weight: 500;
-  font-size: 0.938rem;
-  border-radius: 6px;
-  transition: all 0.2s ease;
-  position: relative;
-}
-
-.nav-tabs a:hover {
-  color: #0f172a;
-  background: #f1f5f9;
-}
-
-.nav-tabs a.active {
-  color: #2563eb;
-  background: #eff6ff;
-}
-
-.nav-tabs a.active::after {
-  content: '';
+.skip-link {
   position: absolute;
-  bottom: -1px;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: #2563eb;
+  left: var(--space-4);
+  top: -48px;
+  z-index: var(--z-toast);
+  padding: var(--space-2) var(--space-4);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  text-decoration: none;
+  transition: top var(--duration-fast) var(--ease);
 }
 
-.main-content {
-  flex: 1;
-  max-width: 1600px;
-  width: 100%;
-  margin: 0 auto;
-  padding: 1.5rem 2rem;
+.skip-link:focus {
+  top: var(--space-3);
 }
 
-.page-header {
-  margin-bottom: 1.5rem;
+/* Keep this breakpoint in sync with AppSidebar.vue; CSS custom properties
+   can't be used inside media queries. */
+@media (max-width: 900px) {
+  /* The drawer overlays the page instead of displacing it, and the menu button
+     needs room beside the filter row. */
+  .app-main,
+  .app-main.is-narrow {
+    margin-left: 0;
+  }
+
+  .app-filters {
+    padding-left: calc(var(--space-4) + 52px);
+  }
 }
 
-.page-header h2 {
-  font-size: 1.875rem;
-  font-weight: 700;
-  color: #0f172a;
-  margin-bottom: 0.375rem;
-  letter-spacing: -0.025em;
-}
+/* --- Migration shims -------------------------------------------------------
+   Views still use bare <table> markup and the old .loading / .error classes.
+   These map them onto the primitives so every screen keeps working while views
+   are migrated one at a time. Delete each shim once no view depends on it —
+   `grep -rn "class=\"loading\"" src/` will tell you. */
 
-.page-header p {
-  color: #64748b;
-  font-size: 0.938rem;
-}
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1.25rem;
-  margin-bottom: 1.5rem;
-}
-
-.stat-card {
-  background: white;
-  padding: 1.25rem;
-  border-radius: 10px;
-  border: 1px solid #e2e8f0;
-  transition: all 0.2s ease;
-}
-
-.stat-card:hover {
-  border-color: #cbd5e1;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
-}
-
-.stat-label {
-  color: #64748b;
-  font-size: 0.875rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 0.625rem;
-}
-
-.stat-value {
-  font-size: 2.25rem;
-  font-weight: 700;
-  color: #0f172a;
-  letter-spacing: -0.025em;
-}
-
-.stat-card.warning .stat-value {
-  color: #ea580c;
-}
-
-.stat-card.success .stat-value {
-  color: #059669;
-}
-
-.stat-card.danger .stat-value {
-  color: #dc2626;
-}
-
-.stat-card.info .stat-value {
-  color: #2563eb;
-}
-
-.card {
-  background: white;
-  border-radius: 10px;
-  padding: 1.25rem;
-  border: 1px solid #e2e8f0;
-  margin-bottom: 1.25rem;
-}
-
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-  padding-bottom: 0.875rem;
-  border-bottom: 1px solid #e2e8f0;
-}
-
-.card-title {
-  font-size: 1.125rem;
-  font-weight: 700;
-  color: #0f172a;
-  letter-spacing: -0.025em;
-}
-
-.table-container {
-  overflow-x: auto;
-}
-
-table {
+.app-content table {
   width: 100%;
   border-collapse: collapse;
+  font-size: var(--text-sm);
 }
 
-thead {
-  background: #f8fafc;
-  border-top: 1px solid #e2e8f0;
-  border-bottom: 1px solid #e2e8f0;
-}
-
-th {
+.app-content thead th {
+  background: var(--color-surface-sunken);
   text-align: left;
-  padding: 0.5rem 0.75rem;
-  font-weight: 600;
-  color: #475569;
-  font-size: 0.75rem;
+  padding: var(--cell-pad-y) var(--cell-pad-x);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: var(--tracking-wide);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  border-bottom: 1px solid var(--color-border);
 }
 
-td {
-  padding: 0.5rem 0.75rem;
-  border-top: 1px solid #f1f5f9;
-  color: #334155;
-  font-size: 0.875rem;
+.app-content tbody td {
+  padding: var(--cell-pad-y) var(--cell-pad-x);
+  height: var(--row-height);
+  border-top: 1px solid var(--color-border);
+  color: var(--color-text-body);
 }
 
-tbody tr {
-  transition: background-color 0.15s ease;
+.app-content tbody tr {
+  transition: background-color var(--duration-fast) var(--ease);
 }
 
-tbody tr:hover {
-  background: #f8fafc;
-}
-
-.badge {
-  display: inline-block;
-  padding: 0.313rem 0.75rem;
-  border-radius: 6px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.025em;
-}
-
-.badge.success {
-  background: #d1fae5;
-  color: #065f46;
-}
-
-.badge.warning {
-  background: #fed7aa;
-  color: #92400e;
-}
-
-.badge.danger {
-  background: #fecaca;
-  color: #991b1b;
-}
-
-.badge.info {
-  background: #dbeafe;
-  color: #1e40af;
-}
-
-.badge.increasing {
-  background: #d1fae5;
-  color: #065f46;
-}
-
-.badge.decreasing {
-  background: #fecaca;
-  color: #991b1b;
-}
-
-.badge.stable {
-  background: #e0e7ff;
-  color: #3730a3;
-}
-
-.badge.high {
-  background: #fecaca;
-  color: #991b1b;
-}
-
-.badge.medium {
-  background: #fed7aa;
-  color: #92400e;
-}
-
-.badge.low {
-  background: #dbeafe;
-  color: #1e40af;
+.app-content tbody tr:hover {
+  background: var(--color-surface-hover);
 }
 
 .loading {
+  padding: var(--space-12) var(--space-6);
   text-align: center;
-  padding: 3rem;
-  color: #64748b;
-  font-size: 0.938rem;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
 }
 
 .error {
-  background: #fef2f2;
-  border: 1px solid #fecaca;
-  color: #991b1b;
-  padding: 1rem;
-  border-radius: 8px;
-  margin: 1rem 0;
-  font-size: 0.938rem;
+  padding: var(--space-4);
+  margin: var(--space-4) 0;
+  border-radius: var(--radius-md);
+  background: var(--danger-bg);
+  border: 1px solid var(--danger-border);
+  color: var(--danger-fg);
+  font-size: var(--text-sm);
 }
 </style>

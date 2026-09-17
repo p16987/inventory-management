@@ -6,6 +6,8 @@ export default {
     orders: '注文',
     finance: '財務',
     demandForecast: '需要予測',
+    restocking: '補充',
+    reports: 'レポート',
     companyName: '触媒コンポーネンツ',
     subtitle: '在庫管理システム'
   },
@@ -103,6 +105,7 @@ export default {
 
   // Orders
   orders: {
+    emptyHint: '注文が登録されるとここに表示されます。',
     title: '注文',
     description: '顧客注文の表示と管理',
     allOrders: 'すべての注文',
@@ -169,6 +172,7 @@ export default {
 
   // Demand Forecast
   demand: {
+    emptyHint: '選択した拠点とカテゴリに該当する在庫品目の予測がここに表示されます。',
     title: '需要予測',
     description: '需要動向の分析と将来のニーズの予測',
     increasingDemand: '需要増加',
@@ -189,6 +193,45 @@ export default {
   },
 
   // Filters
+  // Reports
+  reports: {
+    title: 'パフォーマンスレポート',
+    description: '四半期のパフォーマンス指標と月次トレンドを表示',
+    loadError: 'レポートの読み込みに失敗しました',
+    notAvailable: '該当なし',
+    quarterly: {
+      title: '四半期パフォーマンス',
+      quarter: '四半期',
+      totalOrders: '総注文数',
+      totalRevenue: '総売上',
+      avgOrderValue: '平均注文額',
+      fulfillmentRate: '納品率',
+      empty: '四半期の実績がまだありません',
+      emptyHint: '該当する四半期に注文が入ると、ここに表示されます。'
+    },
+    monthly: {
+      title: '月次売上トレンド',
+      empty: 'グラフに表示できる月次売上がありません',
+      emptyHint: '1か月分以上の注文が記録されると、棒グラフが表示されます。'
+    },
+    comparison: {
+      title: '前月比分析',
+      month: '月',
+      orders: '注文数',
+      revenue: '売上',
+      change: '増減額',
+      growthRate: '成長率',
+      empty: '前月比を表示できません',
+      emptyHint: '成長率の比較には2か月分以上の注文が必要です。'
+    },
+    summary: {
+      totalRevenue: '総売上',
+      avgMonthlyRevenue: '月平均売上',
+      totalOrders: '総注文数',
+      bestQuarter: '最高業績の四半期'
+    }
+  },
+
   filters: {
     timePeriod: '期間',
     location: '場所',
@@ -323,7 +366,8 @@ export default {
     search: '検索',
     filter: 'フィルター',
     export: 'エクスポート',
-    items: '件'
+    items: '件',
+    noDataHint: '期間を広げるか、上の倉庫・カテゴリ・ステータスのフィルターを解除すると、さらに表示されます。'
   },
 
   // Product Names

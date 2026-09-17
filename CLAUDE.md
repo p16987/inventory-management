@@ -42,6 +42,9 @@ cd client
 npm install && npm run dev
 ```
 
+## Code Conventions
+- Always document non-obvious logic changes with comments
+
 ## Key Patterns
 
 **Filter System**: 4 filters (Time Period, Warehouse, Category, Order Status) apply to all data via query params
@@ -67,10 +70,36 @@ npm install && npm run dev
 - API Client: `client/src/api.js`
 - Backend: `server/main.py`, `server/mock_data.py`
 - Data: `server/data/*.json`
-- Styles: `client/src/App.vue`
+- Design tokens: `client/src/styles/tokens.css` (spacing, type, color, radius, elevation, chart series)
+- Shared primitives: `client/src/styles/primitives.css` (card, table, badge, button, form, states)
+- App shell + migration shims: `client/src/App.vue`
+- Sidebar: `client/src/components/AppSidebar.vue` (nav comes from `meta.nav` in `main.js`)
 
 ## Design System
-- Colors: Slate/gray (#0f172a, #64748b, #e2e8f0)
-- Status: green/blue/yellow/red
+
+Token-based. **Never introduce a raw hex value or a hardcoded padding in a component** —
+if a value is missing, add it to `tokens.css` and use the token. That rule is the
+only thing keeping the app from drifting back into seven independently styled screens.
+
+- **Layout**: fixed left sidebar (`AppSidebar.vue`) + content column offset by
+  `--sidebar-width`. Navigation lives in the sidebar; per-page controls live with
+  the page. Add a route to `main.js` with `meta.nav` and it appears in the nav.
+- **Spacing/type**: `var(--space-*)` on a 4px ladder, `var(--text-*)`. Two or three
+  type sizes per screen.
+- **Color**: one accent (`--color-accent`). Status colors (`--success-*`, `--warning-*`,
+  `--danger-*`, `--info-*`) are reserved for state and always pair with a word, never
+  colour alone. Chart series use `--series-1..6` in fixed order — never status hues.
+- **Surfaces**: build from `.card`, `.stat-card`, `.data-table`, `.badge`, `.btn`,
+  `.input`, `.state`. Numeric columns get `class="num"` on both `<th>` and `<td>`.
+- **Narrow screens**: write every flexible grid track as `minmax(0, 1fr)`, never
+  bare `1fr`. A bare track floors at its content's min-content width, so one wide
+  table silently stretches the whole page sideways on a phone — and a screenshot
+  won't show it, because the image just crops. Verify with
+  `document.documentElement.scrollWidth === clientWidth` at 390px.
+- **States**: loading / empty / error are part of the design. Empty states say what
+  would appear and how to make it happen.
+- **Dark mode**: the tokens support it, but `index.html` pins `data-theme="light"`
+  because modals and some components still hardcode light surfaces. Remove the
+  attribute once those are migrated.
 - Charts: Custom SVG, CSS Grid for layouts
 - No emojis in UI
