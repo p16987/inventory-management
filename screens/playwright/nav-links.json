@@ -1,0 +1,30 @@
+[
+  {
+    "href": "/",
+    "label": "Overview"
+  },
+  {
+    "href": "/inventory",
+    "label": "Inventory"
+  },
+  {
+    "href": "/orders",
+    "label": "Orders"
+  },
+  {
+    "href": "/restocking",
+    "label": "Restocking"
+  },
+  {
+    "href": "/spending",
+    "label": "Finance"
+  },
+  {
+    "href": "/demand",
+    "label": "Demand Forecast"
+  },
+  {
+    "href": "/reports",
+    "label": "Reports"
+  }
+]
