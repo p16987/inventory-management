@@ -6,6 +6,8 @@ export default {
     orders: 'Orders',
     finance: 'Finance',
     demandForecast: 'Demand Forecast',
+    restocking: 'Restocking',
+    reports: 'Reports',
     companyName: 'Catalyst Components',
     subtitle: 'Inventory Management System'
   },
@@ -103,6 +105,7 @@ export default {
 
   // Orders
   orders: {
+    emptyHint: 'Customer orders appear here once they are placed.',
     title: 'Orders',
     description: 'View and manage customer orders',
     allOrders: 'All Orders',
@@ -169,6 +172,7 @@ export default {
 
   // Demand Forecast
   demand: {
+    emptyHint: 'Forecasts appear here for inventory items matching the selected location and category.',
     title: 'Demand Forecast',
     description: 'Analyze demand trends and forecasts',
     increasingDemand: 'Increasing Demand',
@@ -323,6 +327,7 @@ export default {
     search: 'Search',
     filter: 'Filter',
     export: 'Export',
-    items: 'items'
+    items: 'items',
+    noDataHint: 'Widen the time period, or clear the warehouse, category and status filters above to see more.'
   }
 }

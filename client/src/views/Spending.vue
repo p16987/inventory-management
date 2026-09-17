@@ -1,19 +1,32 @@
 <template>
   <div class="spending">
-    <div class="page-header">
-      <h2>{{ t('finance.title') }}</h2>
-      <p>{{ t('finance.description') }}</p>
-    </div>
+    <header class="page-header">
+      <div>
+        <h2>{{ t('finance.title') }}</h2>
+        <p>{{ t('finance.description') }}</p>
+      </div>
+    </header>
 
-    <div v-if="loading" class="loading">{{ t('common.loading') }}</div>
-    <div v-else-if="error" class="error">{{ error }}</div>
+    <!-- Skeletons are sized to the tiles and charts they stand in for, so the
+         page doesn't jump the moment the data arrives. -->
+    <div v-if="loading" class="stack" role="status" :aria-label="t('common.loading')">
+      <div class="skeleton-stats">
+        <div v-for="n in 4" :key="n" class="skeleton skeleton-tile"></div>
+      </div>
+      <div class="skeleton skeleton-chart"></div>
+      <div class="skeleton skeleton-chart"></div>
+    </div>
+    <div v-else-if="error" class="state state--error">
+      <p class="state-title">{{ t('common.error') }}</p>
+      <p>{{ error }}</p>
+    </div>
     <div v-else>
       <!-- Revenue & Financial KPIs -->
-      <div class="stats-grid-finance">
+      <div class="stats-grid">
         <div class="stat-card revenue-card">
           <div class="stat-label">{{ t('finance.totalRevenue') }}</div>
           <div class="stat-value">{{ formatCurrency(revenueMetrics.totalRevenue) }}</div>
-          <div class="stat-change positive">
+          <div class="stat-delta up">
             <span class="change-icon">↑</span>
             {{ t('finance.fromOrders', { count: revenueMetrics.orderCount }) }}
           </div>
@@ -36,7 +49,7 @@
       </div>
 
       <!-- Monthly Revenue vs Cost Chart -->
-      <div class="card chart-card">
+      <div class="card">
         <div class="card-header">
           <h3 class="card-title">{{ t('finance.revenueVsCosts.title') }}</h3>
           <div class="chart-legend">
@@ -67,7 +80,7 @@
       </div>
 
       <!-- Monthly Cost Flow Chart -->
-      <div class="card chart-card">
+      <div class="card">
         <div class="card-header">
           <h3 class="card-title">{{ t('finance.monthlyCostFlow.title') }}</h3>
           <div class="chart-legend">
@@ -108,11 +121,11 @@
           <div class="card-header">
             <h3 class="card-title">{{ t('finance.categorySpending.title') }}</h3>
           </div>
-          <div class="category-list">
+          <div v-if="categorySpending.length" class="category-list">
             <div v-for="category in categorySpending" :key="category.category" class="category-item">
               <div class="category-info">
                 <div class="category-name">{{ translateCategory(category.category) }}</div>
-                <div class="category-amount">{{ currencySymbol }}{{ category.amount.toLocaleString() }}</div>
+                <div class="category-amount num">{{ currencySymbol }}{{ category.amount.toLocaleString() }}</div>
               </div>
               <div class="category-bar-container">
                 <div class="category-bar" :style="{ width: category.percentage + '%' }"></div>
@@ -125,39 +138,47 @@
               </div>
             </div>
           </div>
+          <div v-else class="state state--empty">
+            <p class="state-title">{{ t('common.noData') }}</p>
+            <p>Spending by category appears once purchase transactions are recorded for the selected period.</p>
+          </div>
         </div>
 
         <!-- Recent Transactions -->
-        <div class="card transactions-card">
+        <div class="card card--flush transactions-card">
           <div class="card-header">
             <h3 class="card-title">{{ t('finance.transactions.title') }}</h3>
           </div>
-          <div class="transactions-table-container">
-            <table class="transactions-table">
+          <div v-if="recentTransactions.length" class="table-container transactions-scroll">
+            <table class="data-table">
               <thead>
                 <tr>
                   <th>{{ t('finance.transactions.id') }}</th>
                   <th>{{ t('finance.transactions.description') }}</th>
                   <th>{{ t('finance.transactions.vendor') }}</th>
                   <th>{{ t('finance.transactions.date') }}</th>
-                  <th class="text-right">{{ t('finance.transactions.amount') }}</th>
+                  <th class="num">{{ t('finance.transactions.amount') }} ({{ currencySymbol }})</th>
                 </tr>
               </thead>
               <tbody>
                 <tr
                   v-for="transaction in recentTransactions"
                   :key="transaction.id"
-                  class="clickable-row"
+                  class="is-clickable"
                   @click="handleTransactionClick(transaction)"
                 >
                   <td class="transaction-id">{{ transaction.id.toString().padStart(3, '0') }}</td>
                   <td class="transaction-description">{{ transaction.description }}</td>
                   <td class="transaction-vendor">{{ transaction.vendor }}</td>
                   <td class="transaction-date">{{ formatDateShort(transaction.date) }}</td>
-                  <td class="transaction-amount text-right">{{ currencySymbol }}{{ transaction.amount.toLocaleString() }}</td>
+                  <td class="transaction-amount num">{{ transaction.amount.toLocaleString() }}</td>
                 </tr>
               </tbody>
             </table>
+          </div>
+          <div v-else class="state state--empty">
+            <p class="state-title">{{ t('common.noData') }}</p>
+            <p>Transactions posted in the selected period appear here. Widen the time filter to see earlier spending.</p>
           </div>
         </div>
       </div>
@@ -492,82 +513,134 @@ export default {
 </script>
 
 <style scoped>
-.stat-change {
-  margin-top: 0.75rem;
-  font-size: 0.875rem;
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
+/* --- Chart series palette ---------------------------------------------------
+   The cost-flow and revenue series are categorical — they answer "which line of
+   spending is this", not "is this good or bad" — so they draw on the token
+   file's --series-* slots rather than the status colours. Status hues are
+   reserved: a bar drawn in --danger-solid reads as a failing bar, not as
+   "overhead". Slots are assigned in order within each chart and never cycled,
+   so a series keeps its colour when a filter removes the one above it.
+
+   Named aliases rather than raw slot numbers, because one definition is what
+   keeps a legend swatch and the bar it labels from drifting apart. */
+.spending {
+  /* Cost flow: four stacked categories. */
+  --series-procurement: var(--series-1);
+  --series-operational: var(--series-2);
+  --series-labor: var(--series-3);
+  --series-overhead: var(--series-4);
+
+  /* Revenue vs cost: a separate chart, so its slots start again at 1. */
+  --series-revenue: var(--series-1);
+  --series-cost: var(--series-2);
+
+  /* Chart geometry: the plot height, and the strip below the plot floor that
+     the month labels sit in. Both charts share them so their baselines line up. */
+  --chart-height: 350px;
+  --chart-label-gutter: var(--space-8);
 }
 
-.stat-change.positive {
-  color: #059669;
+/* The shared .state stacks with flex `gap`; UA paragraph margins would double it. */
+.state p {
+  margin: 0;
 }
 
-.stat-change.negative {
-  color: #dc2626;
+/* --- Loading skeletons ---------------------------------------------------- */
+
+.skeleton-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--space-4);
 }
 
-.change-icon {
-  font-weight: 700;
-  font-size: 1rem;
+.skeleton-tile {
+  height: 112px;
 }
 
-.chart-card {
-  margin-bottom: 1.75rem;
+.skeleton-chart {
+  height: var(--chart-height);
 }
+
+/* --- KPI tiles ------------------------------------------------------------ */
+
+/* The three headline tiles carry the colour of their series in the charts
+   below, so the eye can connect "Total Costs" to the red bars without a
+   legend. Written as `.stat-card.x` so the shared hover rule, which sets
+   `border-color` on all four sides, cannot grey the accent edge out. */
+.stat-card.revenue-card { border-left: 4px solid var(--series-revenue); }
+.stat-card.cost-card { border-left: 4px solid var(--series-cost); }
+.stat-card.profit-card { border-left: 4px solid var(--accent-500); }
+
+.stat-meta {
+  margin-top: var(--space-2);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+/* --- Charts --------------------------------------------------------------- */
 
 .chart-legend {
   display: flex;
-  gap: 1.5rem;
-  font-size: 0.875rem;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  font-size: var(--text-sm);
 }
 
 .legend-item {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  color: #64748b;
+  gap: var(--space-2);
+  color: var(--color-text-muted);
 }
 
 .legend-dot {
   width: 12px;
   height: 12px;
+  /* Half of --radius-sm: a 12px swatch needs a proportionally smaller corner,
+     and a fully rounded dot reads as a different shape language to the bars. */
   border-radius: 3px;
 }
 
-.legend-dot.procurement { background: #3b82f6; }
-.legend-dot.operational { background: #8b5cf6; }
-.legend-dot.labor { background: #10b981; }
-.legend-dot.overhead { background: #f59e0b; }
-.legend-dot.revenue-color { background: #0f172a; }
-.legend-dot.cost-color { background: #ef4444; }
+.legend-dot.procurement { background: var(--series-procurement); }
+.legend-dot.operational { background: var(--series-operational); }
+.legend-dot.labor { background: var(--series-labor); }
+.legend-dot.overhead { background: var(--series-overhead); }
+.legend-dot.revenue-color { background: var(--series-revenue); }
+.legend-dot.cost-color { background: var(--series-cost); }
 
-.stats-grid-finance {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 2rem;
+.chart-container {
+  padding: var(--space-6) 0;
 }
 
-.revenue-card {
-  border-left: 4px solid #0f172a;
+.bar-chart {
+  display: flex;
+  gap: var(--space-6);
+  height: var(--chart-height);
 }
 
-.cost-card {
-  border-left: 4px solid #ef4444;
+.y-axis {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding-right: var(--space-4);
+  /* The axis stops at the plot floor rather than the bottom of the month
+     labels, so the "0" tick sits level with the foot of the bars. */
+  padding-bottom: var(--chart-label-gutter);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+  border-right: 1px solid var(--color-border);
 }
 
-.profit-card {
-  border-left: 4px solid #3b82f6;
+.chart-area {
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-around;
+  gap: var(--space-2);
 }
 
-.stat-meta {
-  margin-top: 0.5rem;
-  font-size: 0.813rem;
-  color: #64748b;
-}
-
+.bar-group,
 .bar-group-revenue {
   display: flex;
   flex-direction: column;
@@ -580,69 +653,34 @@ export default {
   width: 100%;
   max-width: 80px;
   display: flex;
-  gap: 6px;
+  gap: var(--space-1);
   justify-content: center;
   align-items: flex-end;
   height: 100%;
-  padding-bottom: 2rem;
+  padding-bottom: var(--chart-label-gutter);
 }
 
-.revenue-bar, .cost-bar {
+.revenue-bar,
+.cost-bar {
   width: 50%;
   max-width: 30px;
-  border-radius: 6px 6px 0 0;
-  transition: all 0.3s ease;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  /* `height` stays in the transition list: the bars are sized from the data,
+     so dropping it would remove the grow-in when the period filter changes. */
+  transition: height var(--duration-slow) var(--ease),
+    opacity var(--duration-fast) var(--ease),
+    transform var(--duration-fast) var(--ease);
   cursor: pointer;
-  min-height: 4px;
+  min-height: 4px; /* a near-zero month still reads as a bar, not a gap */
 }
 
-.revenue-bar {
-  background: #0f172a;
-}
+.revenue-bar { background: var(--series-revenue); }
+.cost-bar { background: var(--series-cost); }
 
-.cost-bar {
-  background: #ef4444;
-}
-
-.revenue-bar:hover, .cost-bar:hover {
+.revenue-bar:hover,
+.cost-bar:hover {
   opacity: 0.8;
   transform: scaleY(1.05);
-}
-
-.chart-container {
-  padding: 1.5rem 0;
-}
-
-.bar-chart {
-  display: flex;
-  gap: 1.5rem;
-  height: 350px;
-}
-
-.y-axis {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding-right: 1rem;
-  font-size: 0.75rem;
-  color: #94a3b8;
-  border-right: 1px solid #e2e8f0;
-}
-
-.chart-area {
-  flex: 1;
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-around;
-  gap: 0.5rem;
-}
-
-.bar-group {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  flex: 1;
-  height: 100%;
 }
 
 .stacked-bar {
@@ -652,9 +690,9 @@ export default {
   flex-direction: column-reverse;
   align-items: stretch;
   height: 100%;
-  padding-bottom: 2rem;
+  padding-bottom: var(--chart-label-gutter);
   cursor: pointer;
-  transition: opacity 0.2s ease;
+  transition: opacity var(--duration-fast) var(--ease);
 }
 
 .stacked-bar:hover {
@@ -663,190 +701,198 @@ export default {
 
 .bar-segment {
   width: 100%;
-  transition: all 0.3s ease;
-  cursor: pointer;
   display: block;
+  cursor: pointer;
+  transition: height var(--duration-slow) var(--ease),
+    opacity var(--duration-fast) var(--ease);
 }
 
-.bar-segment:first-child {
-  border-radius: 0 0 6px 6px;
-}
+.bar-segment:first-child { border-radius: 0 0 var(--radius-sm) var(--radius-sm); }
+.bar-segment:last-child { border-radius: var(--radius-sm) var(--radius-sm) 0 0; }
 
-.bar-segment:last-child {
-  border-radius: 6px 6px 0 0;
-}
-
-.bar-segment.procurement { background: #3b82f6; }
-.bar-segment.operational { background: #8b5cf6; }
-.bar-segment.labor { background: #10b981; }
-.bar-segment.overhead { background: #f59e0b; }
+.bar-segment.procurement { background: var(--series-procurement); }
+.bar-segment.operational { background: var(--series-operational); }
+.bar-segment.labor { background: var(--series-labor); }
+.bar-segment.overhead { background: var(--series-overhead); }
 
 .bar-segment:hover {
   opacity: 0.8;
 }
 
 .bar-label {
-  margin-top: 0.5rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #64748b;
+  margin-top: var(--space-2);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  color: var(--color-text-muted);
 }
+
+/* --- Two-column section --------------------------------------------------- */
 
 .two-column-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
-  gap: 1.75rem;
+  /* min() keeps the 450px track from forcing a horizontal scrollbar on a phone,
+     where the track would otherwise be wider than the viewport. */
+  grid-template-columns: repeat(auto-fit, minmax(min(450px, 100%), 1fr));
+  gap: var(--space-6);
 }
+
+/* Inside the grid the gap does the spacing; the card's own margin would add a
+   second, uneven gutter under the shorter column. */
+.two-column-grid > .card {
+  margin-bottom: 0;
+}
+
+/* --- Category spending ---------------------------------------------------- */
 
 .category-list {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: var(--space-5);
 }
 
 .category-item {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: var(--space-2);
 }
 
 .category-info {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: baseline;
+  gap: var(--space-3);
 }
 
 .category-name {
-  font-weight: 600;
-  color: #0f172a;
+  font-weight: var(--weight-semibold);
+  color: var(--color-text);
 }
 
+/* Weight, not colour, carries the emphasis: the accent is spent on the bar
+   below, which is what the figure is being compared against. */
 .category-amount {
-  font-weight: 700;
-  color: #2563eb;
-  font-size: 1.125rem;
+  font-size: var(--text-lg);
+  font-weight: var(--weight-bold);
+  color: var(--color-text);
 }
 
 .category-bar-container {
   width: 100%;
-  height: 8px;
-  background: #f1f5f9;
-  border-radius: 4px;
+  height: var(--space-2);
+  background: var(--color-surface-sunken);
+  border-radius: var(--radius-pill);
   overflow: hidden;
 }
 
 .category-bar {
   height: 100%;
-  background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
-  border-radius: 4px;
-  transition: width 0.6s ease;
+  background: linear-gradient(90deg, var(--accent-500) 0%, var(--accent-600) 100%);
+  border-radius: var(--radius-pill);
+  transition: width var(--duration-slow) var(--ease);
 }
 
 .category-meta {
   display: flex;
   justify-content: space-between;
-  font-size: 0.813rem;
+  gap: var(--space-3);
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
 }
 
 .percentage {
-  color: #64748b;
+  color: var(--color-text-muted);
 }
 
 .change {
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
 }
 
-.change.positive {
-  color: #059669;
-}
+.change.positive { color: var(--success-solid); }
+.change.negative { color: var(--danger-solid); }
 
-.change.negative {
-  color: #dc2626;
-}
+/* --- Transactions --------------------------------------------------------- */
 
 .transactions-card {
   display: flex;
   flex-direction: column;
 }
 
-.transactions-table-container {
+/* The table scrolls inside the card so the two columns keep a comparable
+   height. This element is the scroll container, so the sticky header from
+   .data-table sticks to its top edge rather than the page's. */
+.transactions-scroll {
   overflow-y: auto;
   max-height: 400px;
 }
 
-.transactions-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.transactions-table thead {
-  position: sticky;
-  top: 0;
-  background: #f8fafc;
-  z-index: 1;
-}
-
-.transactions-table th {
-  text-align: left;
-  padding: 0.625rem 0.75rem;
-  font-weight: 600;
-  color: #475569;
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  border-bottom: 1px solid #e2e8f0;
-}
-
-.transactions-table th.text-right {
-  text-align: right;
-}
-
-.transactions-table td {
-  padding: 0.75rem 0.75rem;
-  border-bottom: 1px solid #f1f5f9;
-  font-size: 0.875rem;
-}
-
-.transactions-table tbody tr {
-  cursor: pointer;
-  transition: background-color 0.15s ease;
-}
-
-.transactions-table tbody tr:hover {
-  background: #f8fafc;
-}
-
-.transactions-table tbody tr.clickable-row:hover {
-  background: #eff6ff;
+/* Rows open a transaction detail; the accent tint on hover is the affordance
+   the old private table styling carried, kept on top of the shared hover. */
+.data-table tbody tr.is-clickable:hover {
+  background: var(--color-accent-surface);
 }
 
 .transaction-id {
-  color: #64748b;
-  font-weight: 500;
-  font-family: 'Monaco', 'Courier New', monospace;
-  font-size: 0.813rem;
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
 }
 
 .transaction-description {
-  color: #0f172a;
-  font-weight: 500;
+  color: var(--color-text);
+  font-weight: var(--weight-medium);
 }
 
 .transaction-vendor {
-  color: #64748b;
+  color: var(--color-text-muted);
 }
 
 .transaction-date {
-  color: #64748b;
-  font-size: 0.813rem;
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
 }
 
 .transaction-amount {
-  font-weight: 700;
-  color: #0f172a;
+  font-weight: var(--weight-semibold);
+  color: var(--color-text);
 }
 
-.text-right {
-  text-align: right;
+/* Matches the breakpoint in tokens.css; CSS variables can't be used in a media
+   query, so the literal is duplicated on purpose. */
+@media (max-width: 768px) {
+  .spending {
+    --chart-height: 240px;
+    --chart-label-gutter: var(--space-6);
+  }
+
+  /* Twelve months plus a four-item legend is more than a phone row holds. */
+  .spending .card-header {
+    flex-wrap: wrap;
+  }
+
+  .chart-legend {
+    gap: var(--space-3);
+    font-size: var(--text-xs);
+  }
+
+  /* Twelve month columns will not compress to phone width without the labels
+     colliding, so the plot scrolls sideways while the y-axis labels stay put
+     (they are a sibling of .chart-area, not a child). overflow-y is pinned
+     explicitly because a lone overflow-x:auto computes the other axis to auto
+     and lays a spurious vertical scrollbar across the bars. */
+  .chart-area {
+    overflow-x: auto;
+    overflow-y: hidden;
+    justify-content: flex-start;
+  }
+
+  /* A fixed basis rather than flex:1 — flex items floor at their min-content
+     width (the month label), so shrinking them just pushed the overflow onto
+     the page instead of into this scroller. */
+  .bar-group,
+  .bar-group-revenue {
+    flex: 0 0 34px;
+  }
 }
 </style>

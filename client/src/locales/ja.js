@@ -6,6 +6,8 @@ export default {
     orders: '注文',
     finance: '財務',
     demandForecast: '需要予測',
+    restocking: '補充',
+    reports: 'レポート',
     companyName: '触媒コンポーネンツ',
     subtitle: '在庫管理システム'
   },
@@ -103,6 +105,7 @@ export default {
 
   // Orders
   orders: {
+    emptyHint: '注文が登録されるとここに表示されます。',
     title: '注文',
     description: '顧客注文の表示と管理',
     allOrders: 'すべての注文',
@@ -169,6 +172,7 @@ export default {
 
   // Demand Forecast
   demand: {
+    emptyHint: '選択した拠点とカテゴリに該当する在庫品目の予測がここに表示されます。',
     title: '需要予測',
     description: '需要動向の分析と将来のニーズの予測',
     increasingDemand: '需要増加',
@@ -323,7 +327,8 @@ export default {
     search: '検索',
     filter: 'フィルター',
     export: 'エクスポート',
-    items: '件'
+    items: '件',
+    noDataHint: '期間を広げるか、上の倉庫・カテゴリ・ステータスのフィルターを解除すると、さらに表示されます。'
   },
 
   // Product Names

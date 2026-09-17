@@ -1,0 +1,352 @@
+/* ============================================================================
+   Design tokens
+   ----------------------------------------------------------------------------
+   One source of truth for spacing, type, color, radius, elevation and motion.
+
+   Import this ONCE, before any component styles, so components can override a
+   token rather than fight a more specific selector:
+
+     // main.js
+     import './styles/tokens.css'
+
+   The rule that keeps a token system alive: when a component needs a value
+   that is not here, add it here and use the token. The moment raw hex values
+   and one-off paddings come back into components, the system stops being a
+   system and goes back to being seven screens styled by seven people.
+   ========================================================================= */
+
+:root {
+  /* --- Spacing -------------------------------------------------------------
+     A 4px base. Everything (padding, gap, margin) comes from this ladder, so
+     unrelated screens end up with the same rhythm without anyone coordinating.
+     Rough intent: 1-2 inside a control, 3-4 between related elements,
+     5-6 inside a card, 8+ between page sections. */
+  --space-0: 0;
+  --space-1: 0.25rem;  /*  4px */
+  --space-2: 0.5rem;   /*  8px */
+  --space-3: 0.75rem;  /* 12px */
+  --space-4: 1rem;     /* 16px */
+  --space-5: 1.25rem;  /* 20px */
+  --space-6: 1.5rem;   /* 24px */
+  --space-8: 2rem;     /* 32px */
+  --space-10: 2.5rem;  /* 40px */
+  --space-12: 3rem;    /* 48px */
+  --space-16: 4rem;    /* 64px */
+
+  /* --- Type ----------------------------------------------------------------
+     A small scale on purpose. Two or three sizes per screen is what reads as
+     designed; a screen using six sizes reads as accidental. Use weight, not
+     size, for emphasis within a level. */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    'Helvetica Neue', Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas,
+    'Liberation Mono', monospace;
+
+  --text-xs: 0.75rem;    /* 12px - table headers, meta, badges */
+  --text-sm: 0.875rem;   /* 14px - table cells, secondary body */
+  --text-base: 0.9375rem;/* 15px - body. 15px reads denser than 16 without
+                            feeling cramped, which suits data-heavy UIs */
+  --text-lg: 1.125rem;   /* 18px - card titles */
+  --text-xl: 1.375rem;   /* 22px - section headings */
+  --text-2xl: 1.75rem;   /* 28px - page titles */
+  --text-3xl: 2.25rem;   /* 36px - hero metrics */
+
+  --weight-normal: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  --leading-tight: 1.2;   /* headings and big numbers */
+  --leading-normal: 1.5;  /* body text */
+
+  /* Negative tracking on large text only. At small sizes it hurts legibility. */
+  --tracking-tight: -0.02em;
+  --tracking-wide: 0.05em; /* uppercase labels need the air */
+
+  /* --- Radius --------------------------------------------------------------
+     Two steps plus pill. Controls get sm, surfaces get md; mixing four radii
+     on one screen is one of the loudest "styled by committee" signals. */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-pill: 999px;
+
+  /* --- Elevation -----------------------------------------------------------
+     Shadows describe distance from the page, not decoration. Resting cards use
+     a border and no shadow; shadow is reserved for things that float over
+     content (menus, modals, the mobile drawer) so depth still means something. */
+  --shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.06);
+  --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.08), 0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08);
+  --shadow-lg: 0 12px 32px rgba(15, 23, 42, 0.14);
+
+  /* --- Neutral ramp --------------------------------------------------------
+     A single hue-consistent ramp. Picking greys ad hoc is how a UI ends up with
+     four nearly-identical borders that still look subtly wrong together. */
+  --neutral-0: #ffffff;
+  --neutral-50: #f8fafc;
+  --neutral-100: #f1f5f9;
+  --neutral-200: #e2e8f0;
+  --neutral-300: #cbd5e1;
+  --neutral-400: #94a3b8;
+  --neutral-500: #64748b;
+  --neutral-600: #475569;
+  --neutral-700: #334155;
+  --neutral-800: #1e293b;
+  --neutral-900: #0f172a;
+  --neutral-950: #020617;
+
+  /* --- Accent --------------------------------------------------------------
+     ONE accent. It marks the active nav item, the primary button, and focus.
+     If everything is accented, nothing is. */
+  --accent-50: #eff6ff;
+  --accent-100: #dbeafe;
+  --accent-200: #bfdbfe;
+  --accent-500: #3b82f6;
+  --accent-600: #2563eb;
+  --accent-700: #1d4ed8;
+
+  /* --- Status --------------------------------------------------------------
+     Each status ships as a trio (surface / text / border) so a badge, a banner
+     and a highlighted row can be built without inventing new values. Text-on-
+     surface pairs here clear WCAG AA at small sizes.
+
+     Colour alone is never the whole signal: pair these with a label or an icon
+     so the meaning survives a colourblind reader and a greyscale print. */
+  --success-bg: #d1fae5;
+  --success-fg: #065f46;
+  --success-border: #a7f3d0;
+  --success-solid: #059669;
+
+  --warning-bg: #ffedd5;
+  --warning-fg: #9a3412;
+  --warning-border: #fed7aa;
+  --warning-solid: #ea580c;
+
+  --danger-bg: #fee2e2;
+  --danger-fg: #991b1b;
+  --danger-border: #fecaca;
+  --danger-solid: #dc2626;
+
+  --info-bg: #dbeafe;
+  --info-fg: #1e40af;
+  --info-border: #bfdbfe;
+  --info-solid: #2563eb;
+
+  /* --- Chart series --------------------------------------------------------
+     Categorical hues for charts: identity, not magnitude or status. Status
+     colors above are reserved and must never double as "series 4" — a bar that
+     happens to be red would read as a failing bar.
+
+     Assign these IN ORDER and never cycle: a series keeps its slot even when a
+     filter removes the series above it, or the chart repaints itself every time
+     the data changes. Past six series, fold the tail into "Other" or facet the
+     chart rather than inventing a seventh hue.
+
+     These are a validated set, not a taste call — the order clears the adjacent-
+     pair colorblind and normal-vision separation gates in both light and dark.
+     If you substitute your brand's hues, re-run a palette validator rather than
+     eyeballing it; hues that look distinct to you routinely collapse under
+     deuteranopia. Slots 3, 4 and 5 sit below 3:1 against a light surface, so
+     charts using them need a legend plus direct labels rather than relying on
+     the fill alone to be readable. */
+  --series-1: #2a78d6; /* blue */
+  --series-2: #eb6834; /* orange */
+  --series-3: #1baf7a; /* aqua */
+  --series-4: #eda100; /* yellow */
+  --series-5: #e87ba4; /* magenta */
+  --series-6: #008300; /* green */
+
+  /* --- Semantic surfaces ---------------------------------------------------
+     Components reference THESE, not the ramp above. That indirection is what
+     makes dark mode a matter of redefining a dozen values instead of auditing
+     every component. */
+  --color-bg: var(--neutral-50);          /* page background */
+  --color-surface: var(--neutral-0);      /* cards, sidebar, table body */
+  --color-surface-sunken: var(--neutral-100); /* table headers, wells, inputs */
+  --color-surface-hover: var(--neutral-100);
+  --color-border: var(--neutral-200);     /* card and table borders */
+  --color-border-strong: var(--neutral-300); /* inputs, dividers that must read */
+
+  --color-text: var(--neutral-900);       /* headings, primary values */
+  --color-text-body: var(--neutral-700);  /* table cells, paragraphs */
+  --color-text-muted: var(--neutral-500); /* labels, captions, placeholders */
+  --color-text-inverse: var(--neutral-0);
+
+  --color-accent: var(--accent-600);
+  --color-accent-hover: var(--accent-700);
+  --color-accent-surface: var(--accent-50);
+
+  /* --- Focus ---------------------------------------------------------------
+     A visible focus ring is a feature, not a blemish. Removing it breaks
+     keyboard navigation outright, so style it rather than delete it. */
+  --focus-ring: 0 0 0 3px var(--accent-200);
+  --focus-ring-offset: 2px;
+
+  /* --- Layout --------------------------------------------------------------
+     The shell's fixed dimensions live here so the sidebar, the top bar and the
+     content column can never drift out of agreement. */
+  --sidebar-width: 248px;
+  --sidebar-width-collapsed: 68px;
+  --topbar-height: 60px;
+  --content-max: 1600px;
+  --content-pad-x: var(--space-8);
+  --content-pad-y: var(--space-6);
+
+  /* One density for tabular data. Pick it once; inconsistent row heights are
+     the difference between "restyled" and "designed". */
+  --row-height: 44px;
+  --cell-pad-x: var(--space-3);
+  --cell-pad-y: var(--space-2);
+
+  /* --- Motion --------------------------------------------------------------
+     Short and consistent. Anything over ~250ms on a UI control feels sluggish
+     once you use it fifty times a day. */
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+  --duration-fast: 120ms;
+  --duration-base: 180ms;
+  --duration-slow: 240ms;
+
+  --z-content: 1;
+  --z-sticky: 10;
+  --z-sidebar: 100;
+  --z-drawer: 200;
+  --z-modal: 300;
+  --z-toast: 400;
+}
+
+/* --- Dark mode --------------------------------------------------------------
+   Only the semantic layer is redefined; the scales above stay put. Note that
+   every colour is already defined on :root — a colour whose only definition
+   lives inside a media query disappears for everyone not in dark mode, which
+   is the classic unreadable-UI bug.
+
+   Two selectors, one block: the media query handles the OS preference, and the
+   [data-theme] attribute lets an in-app toggle win. The :not([data-theme="light"])
+   guard is what allows a user to force light mode on a dark-mode machine.
+   If the app has no theme toggle, the attribute selectors are harmless. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --color-bg: var(--neutral-950);
+    --color-surface: #0b1220;
+    --color-surface-sunken: #111a2b;
+    --color-surface-hover: #16213a;
+    --color-border: #1e293b;
+    --color-border-strong: #334155;
+
+    --color-text: var(--neutral-50);
+    --color-text-body: var(--neutral-300);
+    --color-text-muted: var(--neutral-400);
+    --color-text-inverse: var(--neutral-900);
+
+    --color-accent: var(--accent-500);
+    --color-accent-hover: #60a5fa;
+    --color-accent-surface: rgba(59, 130, 246, 0.14);
+
+    /* Status surfaces become tinted glazes rather than pastels — a light
+       pastel on a dark page glows and pulls the eye away from the data. */
+    --success-bg: rgba(5, 150, 105, 0.16);
+    --success-fg: #6ee7b7;
+    --success-border: rgba(5, 150, 105, 0.35);
+
+    --warning-bg: rgba(234, 88, 12, 0.16);
+    --warning-fg: #fdba74;
+    --warning-border: rgba(234, 88, 12, 0.35);
+
+    --danger-bg: rgba(220, 38, 38, 0.16);
+    --danger-fg: #fca5a5;
+    --danger-border: rgba(220, 38, 38, 0.35);
+
+    --info-bg: rgba(37, 99, 235, 0.16);
+    --info-fg: #93c5fd;
+    --info-border: rgba(37, 99, 235, 0.35);
+
+    /* Shadows read as haze on dark backgrounds; deepen them and lean on
+       borders for separation instead. */
+    --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.5);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5);
+    --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.6);
+
+    /* The same six hues re-stepped for the dark surface — not an automatic
+       flip. All six clear 3:1 against a dark page. */
+    --series-1: #3987e5;
+    --series-2: #d95926;
+    --series-3: #199e70;
+    --series-4: #c98500;
+    --series-5: #d55181;
+    --series-6: #008300;
+
+    --focus-ring: 0 0 0 3px rgba(59, 130, 246, 0.45);
+  }
+}
+
+:root[data-theme='dark'] {
+  --color-bg: var(--neutral-950);
+  --color-surface: #0b1220;
+  --color-surface-sunken: #111a2b;
+  --color-surface-hover: #16213a;
+  --color-border: #1e293b;
+  --color-border-strong: #334155;
+
+  --color-text: var(--neutral-50);
+  --color-text-body: var(--neutral-300);
+  --color-text-muted: var(--neutral-400);
+  --color-text-inverse: var(--neutral-900);
+
+  --color-accent: var(--accent-500);
+  --color-accent-hover: #60a5fa;
+  --color-accent-surface: rgba(59, 130, 246, 0.14);
+
+  --success-bg: rgba(5, 150, 105, 0.16);
+  --success-fg: #6ee7b7;
+  --success-border: rgba(5, 150, 105, 0.35);
+
+  --warning-bg: rgba(234, 88, 12, 0.16);
+  --warning-fg: #fdba74;
+  --warning-border: rgba(234, 88, 12, 0.35);
+
+  --danger-bg: rgba(220, 38, 38, 0.16);
+  --danger-fg: #fca5a5;
+  --danger-border: rgba(220, 38, 38, 0.35);
+
+  --info-bg: rgba(37, 99, 235, 0.16);
+  --info-fg: #93c5fd;
+  --info-border: rgba(37, 99, 235, 0.35);
+
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.6);
+
+  /* The same six hues re-stepped for the dark surface — not an automatic
+     flip. All six clear 3:1 against a dark page. */
+  --series-1: #3987e5;
+  --series-2: #d95926;
+  --series-3: #199e70;
+  --series-4: #c98500;
+  --series-5: #d55181;
+  --series-6: #008300;
+
+  --focus-ring: 0 0 0 3px rgba(59, 130, 246, 0.45);
+}
+
+/* --- Density and comfort ----------------------------------------------------
+   Narrow screens get tighter page padding but the SAME scale — the ladder does
+   not change, only which rung the shell stands on. */
+@media (max-width: 768px) {
+  :root {
+    --content-pad-x: var(--space-4);
+    --content-pad-y: var(--space-4);
+  }
+}
+
+/* Respect the OS setting. Users who ask for less motion usually mean it for
+   medical reasons, and a sidebar that slides is not worth a migraine. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast: 0ms;
+    --duration-base: 0ms;
+    --duration-slow: 0ms;
+  }
+}

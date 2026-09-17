@@ -1,5 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<!-- data-theme="light" pins the app to the light palette. The token layer ships
+     a dark mode, but views still carry hardcoded white surfaces and near-black
+     text in their scoped CSS, which would render dark-on-dark for anyone whose
+     OS is set to dark. Remove this attribute once the views are migrated — the
+     tokens already handle the rest. -->
+<html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
